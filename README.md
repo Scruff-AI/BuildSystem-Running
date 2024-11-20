@@ -6,27 +6,30 @@ An AI-powered code generation system that combines multiple language models with
 
 - **Multi-Model Integration**
   - OpenAI GPT (Coordinator)
-  - Claude 3.5 Sonnet
+  - Claude 3 Haiku (via Anthropic API)
   - DeepSeek Coder
-  - Liquid LLM
-  - Hermes
+  - OpenRouter Models:
+    * Primary: Gemini Pro, Llama 2 70B
+    * Automatic fallback system
 
 - **Web Search Integration**
-  - Primary: Tavily API
+  - Primary: Tavily API for real-time information
   - Failover: Brave Search API
   - Parallel search capabilities
+  - Search result summarization
 
-- **Persistent Memory**
-  - Chat history tracking
-  - Code change monitoring
-  - Context preservation
-  - Memory-aware responses
+- **Persistent Memory System**
+  - 5GB storage limit with automatic recycling
+  - Chat history tracking by conversation ID
+  - Code change monitoring with metadata
+  - Context preservation across sessions
+  - Memory-aware model prompting
 
 - **Advanced Logging**
   - Comprehensive logging system
-  - Error tracking
-  - Request monitoring
-  - Log rotation
+  - Model interaction tracking
+  - Error handling and fallback logging
+  - Log rotation and cleanup
 
 ## Setup
 
@@ -59,15 +62,42 @@ Connect to the server using Cline with:
 - Base URL: http://localhost:3000
 - Model Options:
   * "agent-system": Full multi-model system with memory
-  * "Claude 3.5 Sonnet": Direct Claude access
+  * "Claude 3 Haiku": Direct Claude access
+
+The system will:
+- Analyze tasks using the coordinator
+- Search for relevant information if needed
+- Get solutions from multiple models
+- Write code directly to VSCode
+- Maintain context across sessions
+- Automatically handle model fallbacks
 
 ## Architecture
 
-- **Coordinator Service**: Orchestrates task analysis, model selection, and solution review
-- **Search Manager**: Handles web searches with automatic failover
-- **Memory Manager**: Maintains persistent storage of conversations and code changes
-- **Model Clients**: Specialized clients for each AI model
-- **Logging System**: Comprehensive logging with rotation and error tracking
+- **Coordinator Service**: 
+  * Task analysis and decomposition
+  * Model selection and orchestration
+  * Solution review and integration
+  * Memory-aware completions
+
+- **Memory Manager**:
+  * 5GB storage with automatic cleanup
+  * JSON-based persistence
+  * Conversation tracking
+  * Code change history
+  * Context preservation
+
+- **Search Manager**: 
+  * Real-time web search
+  * Automatic failover
+  * Result summarization
+  * Memory integration
+
+- **Model Clients**: 
+  * Specialized implementations
+  * Error handling
+  * Automatic retries
+  * Fallback mechanisms
 
 ## Directory Structure
 
@@ -76,6 +106,10 @@ BuildSystem_Package/
 ├── src/
 │   ├── core/           # Core model types and interfaces
 │   ├── models/         # Model-specific implementations
+│   │   ├── _claude/    # Claude 3 Haiku client
+│   │   ├── _deepseek/  # DeepSeek Coder client
+│   │   ├── _liquid/    # OpenRouter Liquid client
+│   │   └── _hermes/    # OpenRouter Hermes client
 │   ├── web_search.py   # Search functionality
 │   └── memory_manager.py # Persistent memory system
 ├── utils/
@@ -84,6 +118,29 @@ BuildSystem_Package/
 ├── memory/            # Persistent storage (gitignored)
 └── start_standalone.ps1 # Server startup script
 ```
+
+## Memory System Details
+
+The memory system maintains three main components:
+1. **Chat History** (chat_history.json):
+   - Conversations tracked by unique IDs
+   - Message history with timestamps
+   - Role-based organization (user/assistant)
+
+2. **Code Changes** (code_changes.json):
+   - File-based change tracking
+   - Change descriptions and timestamps
+   - Last 5 changes per file preserved
+
+3. **Context** (context.json):
+   - Current session context
+   - Search result summaries
+   - Cross-conversation references
+
+Memory is automatically recycled when approaching the 5GB limit, preserving:
+- Most recent conversations
+- Current session code changes
+- Essential context information
 
 ## Contributing
 
